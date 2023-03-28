@@ -493,6 +493,12 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
             if (!attr.position.empty() && attr.position[0]) {
                 aim->mNumVertices = static_cast<unsigned int>(attr.position[0]->count);
                 attr.position[0]->ExtractData(aim->mVertices);
+                for (unsigned int vertNum = 0; vertNum < aim->mNumVertices; ++vertNum) {
+                    aiVector3D& vert = aim->mVertices[vertNum];
+                    vert.x = AI_BE(vert.x);
+                    vert.y = AI_BE(vert.y);
+                    vert.z = AI_BE(vert.z);
+                }
             }
 
             if (!attr.normal.empty() && attr.normal[0]) {
@@ -500,6 +506,12 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                     DefaultLogger::get()->warn("Normal count in mesh \"", mesh.name, "\" does not match the vertex count, normals ignored.");
                 } else {
                     attr.normal[0]->ExtractData(aim->mNormals);
+                    for (unsigned int normNum = 0; normNum < aim->mNumVertices; ++normNum) {
+                        aiVector3D& norm = aim->mNormals[normNum];
+                        norm.x = AI_BE(norm.x);
+                        norm.y = AI_BE(norm.y);
+                        norm.z = AI_BE(norm.z);
+                    }
 
                     // only extract tangents if normals are present
                     if (!attr.tangent.empty() && attr.tangent[0]) {
@@ -510,6 +522,13 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                             Tangent *tangents = nullptr;
 
                             attr.tangent[0]->ExtractData(tangents);
+                            for (unsigned int tanNum = 0; tanNum < aim->mNumVertices; ++tanNum) {
+                                Tangent& tangent = tangents[tanNum];
+                                tangent.xyz.x = AI_BE(tangent.xyz.x);
+                                tangent.xyz.y = AI_BE(tangent.xyz.y);
+                                tangent.xyz.z = AI_BE(tangent.xyz.z);
+                                tangent.w = AI_BE(tangent.w);
+                            }
 
                             aim->mTangents = new aiVector3D[aim->mNumVertices];
                             aim->mBitangents = new aiVector3D[aim->mNumVertices];
@@ -535,6 +554,13 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 auto componentType = attr.color[c]->componentType;
                 if (componentType == glTF2::ComponentType_FLOAT) {
                     attr.color[c]->ExtractData(aim->mColors[c]);
+                    for (unsigned int clrNum = 0; clrNum < aim->mNumVertices; ++clrNum) {
+                        aiColor4D& color = aim->mColors[c][clrNum];
+                        color.r = AI_BE(color.r);
+                        color.g = AI_BE(color.g);
+                        color.b = AI_BE(color.b);
+                        color.a = AI_BE(color.a);
+                    }
                 } else {
                     if (componentType == glTF2::ComponentType_UNSIGNED_BYTE) {
                         aim->mColors[c] = GetVertexColorsForType<unsigned char>(attr.color[c]);
@@ -556,6 +582,12 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                 }
 
                 attr.texcoord[tc]->ExtractData(aim->mTextureCoords[tc]);
+                for (unsigned int tcNum = 0; tcNum < aim->mNumVertices; ++tcNum) {
+                    aiVector3D& texCoord = aim->mTextureCoords[tc][tcNum];
+                    texCoord.x = AI_BE(texCoord.x);
+                    texCoord.y = AI_BE(texCoord.y);
+                    texCoord.z = AI_BE(texCoord.z);
+                }
                 aim->mNumUVComponents[tc] = attr.texcoord[tc]->GetNumComponents();
 
                 aiVector3D *values = aim->mTextureCoords[tc];
@@ -586,6 +618,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                             aiVector3D *positionDiff = nullptr;
                             target.position[0]->ExtractData(positionDiff);
                             for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
+                                aiVector3D& pos = positionDiff[vertexId];
+                                pos.x = AI_BE(pos.x);
+                                pos.y = AI_BE(pos.y);
+                                pos.z = AI_BE(pos.z);
                                 aiAnimMesh.mVertices[vertexId] += positionDiff[vertexId];
                             }
                             delete[] positionDiff;
@@ -598,6 +634,10 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                             aiVector3D *normalDiff = nullptr;
                             target.normal[0]->ExtractData(normalDiff);
                             for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; vertexId++) {
+                                aiVector3D& norm = normalDiff[vertexId];
+                                norm.x = AI_BE(norm.x);
+                                norm.y = AI_BE(norm.y);
+                                norm.z = AI_BE(norm.z);
                                 aiAnimMesh.mNormals[vertexId] += normalDiff[vertexId];
                             }
                             delete[] normalDiff;
@@ -612,9 +652,22 @@ void glTF2Importer::ImportMeshes(glTF2::Asset &r) {
                         } else {
                             Tangent *tangent = nullptr;
                             attr.tangent[0]->ExtractData(tangent);
+                            for (unsigned int tanNum = 0; tanNum < aim->mNumVertices; ++tanNum) {
+                                Tangent& tan = tangent[tanNum];
+                                tan.xyz.x = AI_BE(tan.xyz.x);
+                                tan.xyz.y = AI_BE(tan.xyz.y);
+                                tan.xyz.z = AI_BE(tan.xyz.z);
+                                tan.w = AI_BE(tan.w);
+                            }
 
                             aiVector3D *tangentDiff = nullptr;
                             target.tangent[0]->ExtractData(tangentDiff);
+                            for (unsigned int tanNum = 0; tanNum < aim->mNumVertices; ++tanNum) {
+                                aiVector3D& tan = tangentDiff[tanNum];
+                                tan.x = AI_BE(tan.x);
+                                tan.y = AI_BE(tan.y);
+                                tan.z = AI_BE(tan.z);
+                            }
 
                             for (unsigned int vertexId = 0; vertexId < aim->mNumVertices; ++vertexId) {
                                 tangent[vertexId].xyz += tangentDiff[vertexId];
@@ -971,6 +1024,13 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
     Weights **weights = new Weights*[attr.weight.size()];
     for (size_t w = 0; w < attr.weight.size(); ++w) {
         attr.weight[w]->ExtractData(weights[w]);
+        for (unsigned int weightNum = 0; weightNum < num_vertices; ++weightNum) {
+            Weights& weight = weights[w][weightNum];
+            weight.values[0] = AI_BE(weight.values[0]);
+            weight.values[1] = AI_BE(weight.values[1]);
+            weight.values[2] = AI_BE(weight.values[2]);
+            weight.values[3] = AI_BE(weight.values[3]);
+        }
     }
 
     struct Indices8 {
@@ -990,6 +1050,13 @@ static void BuildVertexWeightMapping(Mesh::Primitive &primitive, std::vector<std
         indices16 = new Indices16 *[attr.joint.size()];
         for (size_t j = 0; j < attr.joint.size(); ++j) {
             attr.joint[j]->ExtractData(indices16[j]);
+            for (unsigned int idxNum = 0; idxNum < num_vertices; ++idxNum) {
+                Indices16& idx = indices16[j][idxNum];
+                idx.values[0] = AI_BE(idx.values[0]);
+                idx.values[1] = AI_BE(idx.values[1]);
+                idx.values[2] = AI_BE(idx.values[2]);
+                idx.values[3] = AI_BE(idx.values[3]);
+            }
         }
     }
     //
@@ -1125,6 +1192,10 @@ aiNode *ImportNode(aiScene *pScene, glTF2::Asset &r, std::vector<unsigned int> &
                     node.skin->inverseBindMatrices->ExtractData(pbindMatrices);
 
                     for (uint32_t i = 0; i < numBones; ++i) {
+                        for (size_t m=0; m<16; ++m) {
+                            pbindMatrices[i][m] = AI_BE(pbindMatrices[i][m]);
+                        }
+
                         const std::vector<aiVertexWeight> &weights = weighting[i];
                         aiBone *bone = new aiBone();
 
@@ -1258,7 +1329,11 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
             anim->mPositionKeys = new aiVectorKey[anim->mNumPositionKeys];
             unsigned int ii = (samplers.translation->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
             for (unsigned int i = 0; i < anim->mNumPositionKeys; ++i) {
+                times[i] = AI_BE(times[i]);
                 anim->mPositionKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
+                values[ii].x = AI_BE(values[ii].x);
+                values[ii].y = AI_BE(values[ii].y);
+                values[ii].z = AI_BE(values[ii].z);
                 anim->mPositionKeys[i].mValue = values[ii];
                 ii += (samplers.translation->interpolation == Interpolation_CUBICSPLINE) ? 3 : 1;
             }
@@ -1282,7 +1357,12 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
             anim->mRotationKeys = new aiQuatKey[anim->mNumRotationKeys];
             unsigned int ii = (samplers.rotation->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
             for (unsigned int i = 0; i < anim->mNumRotationKeys; ++i) {
+                times[i] = AI_BE(times[i]);
                 anim->mRotationKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
+                values[ii].w = AI_BE(values[ii].w);
+                values[ii].x = AI_BE(values[ii].x);
+                values[ii].y = AI_BE(values[ii].y);
+                values[ii].z = AI_BE(values[ii].z);
                 anim->mRotationKeys[i].mValue.x = values[ii].w;
                 anim->mRotationKeys[i].mValue.y = values[ii].x;
                 anim->mRotationKeys[i].mValue.z = values[ii].y;
@@ -1310,7 +1390,11 @@ aiNodeAnim *CreateNodeAnim(glTF2::Asset &, Node &node, AnimationSamplers &sample
             anim->mScalingKeys = new aiVectorKey[anim->mNumScalingKeys];
             unsigned int ii = (samplers.scale->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
             for (unsigned int i = 0; i < anim->mNumScalingKeys; ++i) {
+                times[i] = AI_BE(times[i]);
                 anim->mScalingKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
+                values[ii].x = AI_BE(values[ii].x);
+                values[ii].y = AI_BE(values[ii].y);
+                values[ii].z = AI_BE(values[ii].z);
                 anim->mScalingKeys[i].mValue = values[ii];
                 ii += (samplers.scale->interpolation == Interpolation_CUBICSPLINE) ? 3 : 1;
             }
@@ -1355,6 +1439,7 @@ aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset &, Node &node, AnimationSample
             unsigned int ii = (samplers.weight->interpolation == Interpolation_CUBICSPLINE) ? 1 : 0;
             for (unsigned int i = 0u; i < anim->mNumKeys; ++i) {
                 unsigned int k = weightStride * i + ii;
+                times[i] = AI_BE(times[i]);
                 anim->mKeys[i].mTime = times[i] * kMillisecondsFromSeconds;
                 anim->mKeys[i].mNumValuesAndWeights = numMorphs;
                 anim->mKeys[i].mValues = new unsigned int[numMorphs];
@@ -1362,6 +1447,7 @@ aiMeshMorphAnim *CreateMeshMorphAnim(glTF2::Asset &, Node &node, AnimationSample
 
                 for (unsigned int j = 0u; j < numMorphs; ++j, ++k) {
                     anim->mKeys[i].mValues[j] = j;
+                    values[k] = AI_BE(values[k]);
                     anim->mKeys[i].mWeights[j] = (0.f > values[k]) ? 0.f : values[k];
                 }
             }
